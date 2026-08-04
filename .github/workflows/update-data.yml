@@ -15,6 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       changed: ${{ steps.commit.outputs.changed }}
+      sha: ${{ steps.commit.outputs.sha }}
     steps:
       - uses: actions/checkout@v4
 
@@ -77,6 +78,7 @@ jobs:
             git commit -m "データ更新: ETC専用料金所 ($(date -u +%Y-%m-%d))"
             git push
             echo 'changed=true' >> "$GITHUB_OUTPUT"
+            echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
           fi
 
   # Actions が GITHUB_TOKEN で push しても deploy.yml の push トリガーは発火しない
@@ -89,3 +91,7 @@ jobs:
       pages: write
       id-token: write
     uses: ./.github/workflows/deploy.yml
+    # 実行中に作ったコミットを指定する。省略すると起動時の SHA が使われ、
+    # 更新前のデータが公開されてしまう。
+    with:
+      ref: ${{ needs.update.outputs.sha }}
