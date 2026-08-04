@@ -13,6 +13,8 @@ permissions:
 jobs:
   update:
     runs-on: ubuntu-latest
+    outputs:
+      changed: ${{ steps.commit.outputs.changed }}
     steps:
       - uses: actions/checkout@v4
 
@@ -63,13 +65,27 @@ jobs:
           PY
 
       - name: 差分があればコミット
+        id: commit
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email 'github-actions[bot]@users.noreply.github.com'
           git add data/ic.json data/unmatched.json
           if git diff --staged --quiet; then
             echo '変更なし'
+            echo 'changed=false' >> "$GITHUB_OUTPUT"
           else
             git commit -m "データ更新: ETC専用料金所 ($(date -u +%Y-%m-%d))"
             git push
+            echo 'changed=true' >> "$GITHUB_OUTPUT"
           fi
+
+  # Actions が GITHUB_TOKEN で push しても deploy.yml の push トリガーは発火しない
+  # ため、ここから明示的に呼ぶ。呼ばないと更新したデータが公開されないまま残る。
+  publish:
+    needs: update
+    if: needs.update.outputs.changed == 'true'
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    uses: ./.github/workflows/deploy.yml
