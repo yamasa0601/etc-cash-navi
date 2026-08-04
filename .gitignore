@@ -1,0 +1,10 @@
+node_modules/
+dist/
+.venv/
+web/public/data/
+.DS_Store
+__pycache__/
+*.pyc
+
+# 取得元の生データ。再取得できるうえ大きいので追跡しない。
+data/raw/

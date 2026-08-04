@@ -1,0 +1,78 @@
+name: データ更新
+
+# ETC 専用料金所は毎月のように増えるため定期的に取り直す。
+# 差分が出たらコミットし、deploy ワークフローが公開まで行う。
+on:
+  schedule:
+    - cron: '0 20 * * 0'   # 毎週月曜 05:00 JST
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: 依存パッケージ
+        run: pip install -r scripts/requirements.txt
+
+      - name: パースのテスト
+        run: python scripts/test_parsing.py
+        working-directory: scripts
+
+      - name: 県境データ
+        run: |
+          mkdir -p data/raw
+          curl -sSL -o data/raw/japan_pref.geojson \
+            https://raw.githubusercontent.com/dataofjapan/land/master/japan.geojson
+
+      - name: OpenStreetMap から IC 位置を取得
+        run: python scripts/fetch_osm.py --refresh
+        working-directory: scripts
+
+      - name: NEXCO 3 社から ETC 専用料金所を取得して統合
+        run: python build_dataset.py --refresh
+        working-directory: scripts
+
+      # 取得に失敗すると件数が激減する。壊れたデータを公開しないための歯止め。
+      - name: 件数の妥当性チェック
+        run: |
+          python - <<'PY'
+          import json, sys
+          d = json.load(open('data/ic.json'))
+          c = d['counts']
+          print(json.dumps(c, ensure_ascii=False, indent=2))
+          problems = []
+          if c['facilities'] < 3000:
+              problems.append(f"施設数が少なすぎる: {c['facilities']}")
+          if c['etc_only'] < 300:
+              problems.append(f"ETC専用の件数が少なすぎる: {c['etc_only']}")
+          if c['unmatched'] > c['matched'] * 0.1:
+              problems.append(f"突き合わせ失敗が多い: {c['unmatched']}/{c['matched']}")
+          for key, n in c['source_records'].items():
+              if n == 0:
+                  problems.append(f"{key} の取得が 0 件")
+          if problems:
+              print('\n'.join('NG: ' + p for p in problems))
+              sys.exit(1)
+          print('OK')
+          PY
+
+      - name: 差分があればコミット
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email 'github-actions[bot]@users.noreply.github.com'
+          git add data/ic.json data/unmatched.json
+          if git diff --staged --quiet; then
+            echo '変更なし'
+          else
+            git commit -m "データ更新: ETC専用料金所 ($(date -u +%Y-%m-%d))"
+            git push
+          fi

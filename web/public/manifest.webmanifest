@@ -1,0 +1,20 @@
+{
+  "name": "現金ETCナビ",
+  "short_name": "現金ETC",
+  "description": "ETC専用インターチェンジを避けて、現金で通れる高速道路の経路を組み立てます。",
+  "start_url": ".",
+  "scope": ".",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#f5f6f8",
+  "theme_color": "#188038",
+  "lang": "ja",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="現金ETCナビ">
+  <rect width="512" height="512" rx="96" fill="#188038"/>
+  <path d="M96 400 L200 152 h112 L416 400 h-72 L268 216 h-24 L168 400 Z" fill="#ffffff" opacity="0.18"/>
+  <circle cx="256" cy="232" r="104" fill="#ffffff"/>
+  <text x="256" y="272" font-family="system-ui, sans-serif" font-size="120" font-weight="700"
+        text-anchor="middle" fill="#188038">¥</text>
+  <rect x="128" y="376" width="256" height="40" rx="20" fill="#ffffff"/>
+  <rect x="168" y="388" width="176" height="16" rx="8" fill="#188038"/>
+</svg>

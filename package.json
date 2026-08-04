@@ -1,0 +1,21 @@
+{
+  "name": "etc-cash-navi",
+  "version": "0.1.0",
+  "description": "現金で通れる高速道路の入口・出口を探して経路を組み立てるPWA",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "data": "python3 scripts/fetch_osm.py && python3 scripts/build_dataset.py --refresh && node scripts/copy-data.mjs",
+    "predev": "node scripts/copy-data.mjs",
+    "prebuild": "node scripts/copy-data.mjs",
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "maplibre-gl": "^5.6.0"
+  },
+  "devDependencies": {
+    "vite": "^7.0.0"
+  }
+}
