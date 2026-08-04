@@ -25,7 +25,6 @@ jobs:
 
       - name: パースのテスト
         run: python scripts/test_parsing.py
-        working-directory: scripts
 
       - name: 県境データ
         run: |
@@ -35,11 +34,9 @@ jobs:
 
       - name: OpenStreetMap から IC 位置を取得
         run: python scripts/fetch_osm.py --refresh
-        working-directory: scripts
 
       - name: NEXCO 3 社から ETC 専用料金所を取得して統合
-        run: python build_dataset.py --refresh
-        working-directory: scripts
+        run: python scripts/build_dataset.py --refresh
 
       # 取得に失敗すると件数が激減する。壊れたデータを公開しないための歯止め。
       - name: 件数の妥当性チェック
